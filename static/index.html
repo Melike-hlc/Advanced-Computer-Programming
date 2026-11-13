@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Öğrenci Kayıt Sistemi</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #202b2c;
+            --muted: #637273;
+            --line: #d9e1de;
+            --paper: #f4f7f4;
+            --surface: #fff;
+            --accent: #176b57;
+            --danger: #a43e39;
+            --notice: #e9f4ef;
+        }
+
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Trebuchet MS", sans-serif; }
+        header { padding: 26px clamp(18px, 5vw, 64px); border-bottom: 1px solid var(--line); background: var(--surface); }
+        header p, .eyebrow { margin: 0 0 8px; color: var(--accent); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        h1, h2 { margin: 0; }
+        h1 { font: 30px Georgia, serif; }
+        h2 { margin-bottom: 18px; font: 21px Georgia, serif; }
+        main { display: grid; grid-template-columns: minmax(250px, 330px) minmax(0, 1fr); gap: 32px; max-width: 1240px; margin: 0 auto; padding: 30px clamp(18px, 5vw, 64px); }
+        section { min-width: 0; }
+        .form-panel { padding-right: 28px; border-right: 1px solid var(--line); }
+        label { display: block; margin: 14px 0 6px; color: var(--muted); font-size: 13px; }
+        input { width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid #b9c7c2; border-radius: 4px; background: var(--surface); color: var(--ink); font: inherit; }
+        input:focus { outline: 2px solid #8fc4b2; outline-offset: 1px; }
+        button { min-height: 38px; padding: 8px 13px; border: 0; border-radius: 4px; background: var(--accent); color: white; font: inherit; font-weight: 700; cursor: pointer; }
+        button:hover { filter: brightness(.92); }
+        button:disabled { opacity: .6; cursor: wait; }
+        form button { width: 100%; margin-top: 20px; }
+        button.delete { min-height: 32px; padding: 6px 9px; background: var(--danger); }
+        #notice { min-height: 44px; margin: 0 0 18px; padding: 12px 14px; border-left: 3px solid var(--accent); background: var(--notice); }
+        #notice[hidden] { display: none; }
+        #notice.error { border-color: var(--danger); background: #f8ecea; }
+        .filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0 0 16px; }
+        .filters label { margin: 0; }
+        select { width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid #b9c7c2; border-radius: 4px; background: var(--surface); color: var(--ink); font: inherit; }
+        .filters button { border: 1px solid var(--line); background: var(--surface); color: var(--accent); }
+        .table-wrap { overflow-x: auto; border-top: 1px solid var(--line); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); }
+        th { color: var(--muted); font-size: 12px; font-weight: 700; }
+        td { font-size: 14px; }
+        td.email { overflow-wrap: anywhere; }
+        .count { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+        .empty { padding: 24px 10px; color: var(--muted); text-align: center; }
+        .enrollment-panel { margin-top: 42px; }
+        @media (max-width: 760px) {
+            main { grid-template-columns: 1fr; gap: 28px; }
+            .form-panel { padding: 0 0 26px; border-right: 0; border-bottom: 1px solid var(--line); }
+            h1 { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <p>Öğrenci işleri</p>
+        <h1>Öğrenci Kayıt Sistemi</h1>
+    </header>
+    <main>
+        <section class="form-panel" aria-labelledby="form-title">
+            <p class="eyebrow">Yeni kayıt</p>
+            <h2 id="form-title">Öğrenci ekle</h2>
+            <form id="student-form">
+                <label for="first-name">Ad</label>
+                <input id="first-name" name="first_name" maxlength="50" required>
+                <label for="last-name">Soyad</label>
+                <input id="last-name" name="last_name" maxlength="50" required>
+                <label for="email">E-posta</label>
+                <input id="email" name="email" type="email" maxlength="100" required>
+                <label for="enrollment-year">Kayıt yılı</label>
+                <input id="enrollment-year" name="enrollment_year" type="number" min="1900" max="2100" required>
+                <button id="submit-button" type="submit">Öğrenciyi kaydet</button>
+            </form>
+        </section>
+        <section aria-labelledby="list-title">
+            <p class="eyebrow">Kayıtlar</p>
+            <h2 id="list-title">Öğrenciler</h2>
+            <p id="notice" role="status" aria-live="polite" hidden></p>
+            <div class="filters" aria-label="Öğrenci filtreleri">
+                <label for="name-prefix">Ad veya soyad başlangıcı
+                    <input id="name-prefix" type="search" maxlength="50" placeholder="Örn. A veya Ali">
+                </label>
+                <label for="course-filter">Ders
+                    <select id="course-filter">
+                        <option value="">Tüm dersler</option>
+                    </select>
+                </label>
+                <label for="section-filter">Section
+                    <select id="section-filter">
+                        <option value="">Tüm sectionlar</option>
+                    </select>
+                </label>
+                <button id="clear-filters" type="button">Filtreleri temizle</button>
+            </div>
+            <p id="count" class="count"></p>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Öğrenci</th>
+                            <th scope="col">E-posta</th>
+                            <th scope="col">Kayıt yılı</th>
+                            <th scope="col">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-body"></tbody>
+                </table>
+            </div>
+            <section class="enrollment-panel" aria-labelledby="enrollment-title">
+                <p class="eyebrow">Ders kayıtları</p>
+                <h2 id="enrollment-title">Öğrencilerin ders seçimleri</h2>
+                <p id="enrollment-count" class="count"></p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Öğrenci</th>
+                                <th scope="col">Ders</th>
+                                <th scope="col">Section</th>
+                                <th scope="col">Dönem</th>
+                                <th scope="col">Öğretim görevlisi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="enrollments-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+    </main>
+    <script>
+        const form = document.querySelector("#student-form");
+        const tbody = document.querySelector("#students-body");
+        const notice = document.querySelector("#notice");
+        const count = document.querySelector("#count");
+        const enrollmentsBody = document.querySelector("#enrollments-body");
+        const enrollmentCount = document.querySelector("#enrollment-count");
+        const submitButton = document.querySelector("#submit-button");
+        const namePrefix = document.querySelector("#name-prefix");
+        const courseFilter = document.querySelector("#course-filter");
+        const sectionFilter = document.querySelector("#section-filter");
+        const clearFilters = document.querySelector("#clear-filters");
+        let students = [];
+        let enrollments = [];
+
+        function showMessage(message, isError = false) {
+            notice.textContent = message;
+            notice.classList.toggle("error", isError);
+            notice.hidden = false;
+        }
+
+        async function request(url, options = {}) {
+            const response = await fetch(url, options);
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.detail || result.message || "İşlem tamamlanamadı.");
+            }
+            return result;
+        }
+
+        function matchesName(firstName, lastName, prefix) {
+            if (!prefix) return true;
+            const normalizedPrefix = prefix.toLocaleLowerCase("tr-TR");
+            return firstName.toLocaleLowerCase("tr-TR").startsWith(normalizedPrefix)
+                || lastName.toLocaleLowerCase("tr-TR").startsWith(normalizedPrefix);
+        }
+
+        function getFilteredEnrollments() {
+            const prefix = namePrefix.value.trim();
+            return enrollments.filter((enrollment) =>
+                (!courseFilter.value || enrollment.course_code === courseFilter.value)
+                && (!sectionFilter.value || String(enrollment.section_id) === sectionFilter.value)
+                && matchesName(enrollment.first_name, enrollment.last_name, prefix)
+            );
+        }
+
+        function renderStudents() {
+            const filteredEnrollments = getFilteredEnrollments();
+            const enrolledStudentIds = new Set(filteredEnrollments.map((item) => item.student_id));
+            const hasCourseFilter = Boolean(courseFilter.value || sectionFilter.value);
+            const visibleStudents = students.filter((student) =>
+                matchesName(student.first_name, student.last_name, namePrefix.value.trim())
+                && (!hasCourseFilter || enrolledStudentIds.has(student.student_id))
+            );
+
+            tbody.replaceChildren();
+            count.textContent = `${visibleStudents.length} / ${students.length} öğrenci gösteriliyor`;
+
+            if (visibleStudents.length === 0) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+                cell.colSpan = 5;
+                cell.className = "empty";
+                cell.textContent = students.length === 0
+                    ? "Henüz öğrenci kaydı yok."
+                    : "Bu filtrelerle eşleşen öğrenci yok.";
+                row.append(cell);
+                tbody.append(row);
+                return;
+            }
+
+            for (const student of visibleStudents) {
+                const row = document.createElement("tr");
+                for (const value of [
+                    student.student_id,
+                    `${student.first_name} ${student.last_name}`,
+                    student.email,
+                    student.enrollment_year,
+                ]) {
+                    const cell = document.createElement("td");
+                    cell.textContent = value;
+                    if (typeof value === "string" && value.includes("@")) cell.className = "email";
+                    row.append(cell);
+                }
+
+                const actionCell = document.createElement("td");
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "delete";
+                deleteButton.type = "button";
+                deleteButton.textContent = "Sil";
+                deleteButton.setAttribute("aria-label", `${student.first_name} ${student.last_name} kaydını sil`);
+                deleteButton.addEventListener("click", () => deleteStudent(student.student_id));
+                actionCell.append(deleteButton);
+                row.append(actionCell);
+                tbody.append(row);
+            }
+        }
+
+        function renderEnrollments() {
+            const visibleEnrollments = getFilteredEnrollments();
+            enrollmentsBody.replaceChildren();
+            enrollmentCount.textContent = `${visibleEnrollments.length} / ${enrollments.length} ders kaydı gösteriliyor`;
+
+            if (visibleEnrollments.length === 0) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+                cell.colSpan = 5;
+                cell.className = "empty";
+                cell.textContent = enrollments.length === 0
+                    ? "Henüz ders seçimi yok."
+                    : "Bu filtrelerle eşleşen ders seçimi yok.";
+                row.append(cell);
+                enrollmentsBody.append(row);
+                return;
+            }
+
+            for (const enrollment of visibleEnrollments) {
+                const row = document.createElement("tr");
+                const values = [
+                    `${enrollment.first_name} ${enrollment.last_name}`,
+                    `${enrollment.course_code} - ${enrollment.course_name}`,
+                    `${enrollment.section_number}. şube`,
+                    enrollment.semester,
+                    enrollment.instructor_name || "-",
+                ];
+                for (const value of values) {
+                    const cell = document.createElement("td");
+                    cell.textContent = value;
+                    row.append(cell);
+                }
+                enrollmentsBody.append(row);
+            }
+        }
+
+        function renderViews() {
+            renderStudents();
+            renderEnrollments();
+        }
+
+        function updateSectionOptions() {
+            const selectedSection = sectionFilter.value;
+            const availableSections = [...new Map(
+                enrollments
+                    .filter((item) => !courseFilter.value || item.course_code === courseFilter.value)
+                    .map((item) => [item.section_id, item])
+            ).values()].sort((a, b) =>
+                a.course_code.localeCompare(b.course_code)
+                || a.semester.localeCompare(b.semester)
+                || a.section_number - b.section_number
+            );
+
+            sectionFilter.replaceChildren(new Option("Tüm sectionlar", ""));
+            for (const section of availableSections) {
+                sectionFilter.add(new Option(
+                    `${section.course_code} · ${section.section_number}. şube · ${section.semester}`,
+                    String(section.section_id)
+                ));
+            }
+            sectionFilter.value = availableSections.some(
+                (section) => String(section.section_id) === selectedSection
+            ) ? selectedSection : "";
+        }
+
+        function populateCourseOptions() {
+            const selectedCourse = courseFilter.value;
+            const courses = [...new Map(
+                enrollments.map((item) => [item.course_code, item.course_name])
+            )].sort(([codeA], [codeB]) => codeA.localeCompare(codeB));
+
+            courseFilter.replaceChildren(new Option("Tüm dersler", ""));
+            for (const [courseCode, courseName] of courses) {
+                courseFilter.add(new Option(`${courseCode} · ${courseName}`, courseCode));
+            }
+            courseFilter.value = courses.some(([courseCode]) => courseCode === selectedCourse)
+                ? selectedCourse : "";
+            updateSectionOptions();
+        }
+
+        async function loadStudents() {
+            students = await request("/students/");
+            renderViews();
+        }
+
+        async function loadEnrollments() {
+            enrollments = await request("/enrollments/");
+            populateCourseOptions();
+            renderViews();
+        }
+
+        namePrefix.addEventListener("input", renderViews);
+        courseFilter.addEventListener("change", () => {
+            updateSectionOptions();
+            renderViews();
+        });
+        sectionFilter.addEventListener("change", renderViews);
+        clearFilters.addEventListener("click", () => {
+            namePrefix.value = "";
+            courseFilter.value = "";
+            sectionFilter.value = "";
+            updateSectionOptions();
+            renderViews();
+        });
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            submitButton.disabled = true;
+            try {
+                const formData = new FormData(form);
+                const student = Object.fromEntries(formData.entries());
+                student.enrollment_year = Number(student.enrollment_year);
+                const result = await request("/students/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(student),
+                });
+                form.reset();
+                showMessage(result.message);
+                await loadStudents();
+            } catch (error) {
+                showMessage(error.message, true);
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+
+        async function deleteStudent(studentId) {
+            try {
+                const result = await request(`/students/${studentId}`, { method: "DELETE" });
+                showMessage(result.message);
+                await loadStudents();
+                await loadEnrollments();
+            } catch (error) {
+                showMessage(error.message, true);
+            }
+        }
+
+        loadStudents().catch((error) => showMessage(error.message, true));
+        loadEnrollments().catch((error) => showMessage(error.message, true));
+    </script>
+</body>
+</html>

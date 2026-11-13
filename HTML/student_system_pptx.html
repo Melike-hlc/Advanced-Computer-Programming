@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System Presentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+        
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide {
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 60px;
+            display: none;
+            flex-direction: column;
+            position: relative;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .slide.active {
+            display: flex;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .slide h1 {
+            font-size: 3em;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .slide h2 {
+            font-size: 2.2em;
+            color: #667eea;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .slide h3 {
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .slide ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .slide li {
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+            color: #555;
+        }
+        
+        .slide li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-size: 1.5em;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        .keyword {
+            color: #ff79c6;
+        }
+        
+        .string {
+            color: #f1fa8c;
+        }
+        
+        .comment {
+            color: #6272a4;
+        }
+        
+        .function {
+            color: #50fa7b;
+        }
+        
+        .architecture {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .arch-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .arch-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+        
+        .arch-box p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 30px 0;
+        }
+        
+        .flow-box {
+            background: #f0f4ff;
+            border: 3px solid #667eea;
+            padding: 20px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .arrow {
+            font-size: 2em;
+            color: #667eea;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .slide-number {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            color: #999;
+            font-size: 1.1em;
+        }
+        
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .title-slide h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        
+        .title-slide p {
+            font-size: 1.5em;
+            color: #666;
+            margin-top: 20px;
+        }
+        
+        .highlight-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 2px solid #667eea;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide">
+            <h1>🎓 Student Management System</h1>
+            <p>A Full-Stack Web Application</p>
+            <p style="margin-top: 40px; font-size: 1.2em;">FastAPI + SQLite + HTML/CSS/JavaScript</p>
+        </div>
+        
+        <!-- Slide 2: Overview -->
+        <div class="slide">
+            <h2>📋 Project Overview</h2>
+            <div class="content">
+                <ul>
+                    <li><strong>Purpose:</strong> Manage student records with CRUD operations</li>
+                    <li><strong>Backend:</strong> FastAPI (Python web framework)</li>
+                    <li><strong>Database:</strong> SQLite (lightweight SQL database)</li>
+                    <li><strong>Frontend:</strong> HTML, CSS, JavaScript (vanilla)</li>
+                    <li><strong>Features:</strong> Add, Edit, Delete, and View students</li>
+                </ul>
+                
+                <div class="architecture">
+                    <div class="arch-box">
+                        <h4>Frontend</h4>
+                        <p>HTML/CSS/JS</p>
+                        <p>User Interface</p>
+                    </div>
+                    <div class="arch-box">
+                        <h4>Backend</h4>
+                        <p>FastAPI</p>
+                        <p>REST API</p>
+                    </div>
+                    <div class="arch-box">
+                        <h4>Database</h4>
+                        <p>SQLite</p>
+                        <p>Data Storage</p>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">2 / 10</div>
+            <div class="controls">
+                <button onclick="prevSlide()">← Previous</button>
+                <button onclick="nextSlide()">Next →</button>
+            </div>
+        </div>
+        
+        <!-- Slide 3: System Architecture -->
+        <div class="slide">
+            <h2>🏗️ System Architecture</h2>
+            <div class="content">
+                <div class="flow-diagram">
+                    <div class="flow-box">Browser<br>(Frontend)</div>
+                    <div class="arrow">↔</div>
+                    <div class="flow-box">FastAPI<br>(Backend)</div>
+                    <div class="arrow">↔</div>
+                    <div class="flow-box">SQLite<br>(Database)</div>
+                </div>
+                
+                <h3>Request Flow:</h3>
+                <ul>
+                    <li>User interacts with HTML form/buttons</li>
+                    <li>JavaScript sends HTTP requests to FastAPI</li>
+                    <li>FastAPI processes requests and queries SQLite</li>
+                    <li>Database returns data to FastAPI</li>
+                    <li>FastAPI sends JSON response to frontend</li>
+                    <li>JavaScript updates the UI dynamically</li>
+                </ul>
+            </div>
+            <div class="slide-number">3 / 10</div>
+            <div class="controls">
+                <button onclick="prevSlide()">← Previous</button>
+                <button onclick="nextSlide()">Next →</button>
+            </div>
+        </div>
+        
+        <!-- Slide 4: Backend Setup -->
+        <div class="slide">
+            <h2>⚙️ Backend Setup (main.py)</h2>
+            <div class="content">
+                <h3>1. Imports and Configuration</h3>
+                <div class="code-block">
+<span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI
+<span class="keyword">from</span> pydantic <span class="keyword">import</span> BaseModel
+<span class="keyword">import</span> sqlite3
+
+app = <span class="function">FastAPI()</span>
+                </div>
+                
+                <ul>
+                    <li><strong>FastAPI:</strong> Modern Python web framework</li>
+                    <li><strong>Pydantic:</strong> Data validation using Python types</li>
+                    <li><strong>sqlite3:</strong> Built-in Python SQLite library</li>
+                    <li><strong>CORS Middleware:</strong> Allows frontend to communicate with backend</li>
+                </ul>
+            </div>
+            <div class="slide-number">4 / 10</div>
+            <div class="controls">
+                <button onclick="prevSlide()">← Previous</button>
+                <button onclick="nextSlide()">Next →</button>
+            </div>
+        </div>
+        
+        <!-- Slide 5: Data Models -->
+        <div class="slide">
+            <h2>📝 Data Models</h2>
+            <div class="content">
+                <div class="two-column">
+                    <div>
+                        <h3>StudentCreate (Input)</h3>
+                        <div class="code-block">
+<span class="keyword">class</span> <span class="function">StudentCreate</span>(BaseModel):
+    name: <span class="keyword">str</span>
+    grade: <span class="keyword">int</span>
+                        </div>
+                        <p style="margin-top: 10px;">Used for POST and PUT requests</p>
+                    </div>
+                    
+                    <div>
+                        <h3>Student (Output)</h3>
+                        <div class="code-block">
+<span class="keyword">class</span> <span class="function">Student</span>(BaseModel):
+    id: <span class="keyword">int</span>
+    name: <span class="keyword">str</span>
+    grade: <span class="keyword">int</span>
+                        </div>
+                        <p style="margin-top: 10px;">Includes auto-generated ID</p>
+                    </div>
+                </div>
+                
+                <div class="highlight-box">
+                    <strong>⚠️ Important Fix:</strong> Separated models to avoid 422 errors. When creating students, ID is auto-generated by the database, so it shouldn't be in the input model.
+                </div>
+            </div>
+            <div class="slide-number">5 / 10</div>
+            <div class="controls">
+                <button onclick="prevSlide()">← Previous</button>
+                <button onclick="nextSlide()">Next →</button>
+            </div>
+        </div>
+        
+        <!-- Slide 6: Database Setup -->
+        <div class="slide">
+            <h2>🗄️ Database Setup</h2>
+            <div class="content">
+                <div class="code-block">
+<span class="keyword">def</span> <span class="function">setup_database</span>():
+    conn = sqlite3.<span class="function">connect</span>(<span class="string">'students.db'</span>)
+    cursor = conn.<span class="function">cursor</span>()
+    cursor.<span class="function">execute</span>(<span class="string">'''
+        CREATE TABLE IF NOT EXISTS students (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            grade INTEGER
+        )
+    '''</span>)
+    conn.<span class="function">commit</span>()
+    conn.<span class="function">close</span>()
+                </div>
+                
+                <h3>Database Schema:</h3>
+                <table>
+                    <tr>
+                        <th>Column</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>id</td>
+                        <td>INTEGER</td>
+                        <td>Primary key, auto-increment</td>
+                    </tr>
+                    <tr>
+                        <td>name</td>
+                        <td>TEXT</td>
+                        <td>Student name (required)</td>
+                    </tr>
+                    <tr>
+                        <td>grade</td>
+                        <td>INTEGER</td>
+                        <td>Student grade (0-100)</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="slide-number">6 / 10</div>
+            <div class="controls">
+                <button onclick="prevSlide()">← Previous</button>
+                <button onclick="nextSlide()">Next →</button>
+            </div>
+        </div>
+        
+        <!-- Slide 7: API Endpoints -->
+        <div class="slide">
+            <h2>🔌 REST API Endpoints</h2>
+            <div class="content">
+                <table>
+                    <tr>
+                        <th>Method</th>
+                        <th>Endpoint</th>
+                        <th>Purpose</th>
+                    </tr>
+                    <tr>
+                        <td><strong>GET</strong></td>
+                        <td>/students/</td>
+                        <td>Fetch all students</td>
+                    </tr>
+                    <tr>
+                        <td><strong>POST</strong></td>
+                        <td>/students/</td>
+                        <td>Create new student</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PUT</strong></td>
+                        <td>/students/{id}</td>
+                        <td>Update existing student</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DELETE</strong></td>
+                        <td>/students/{id}</td>
+                        <td>Delete student</td>
+                    </tr>
+                </table>
+                
+                <h3>Example: Create Student (POST)</h3>
+                <div class="code-block">
+@app.<span class="function">post</span>(<span class="string">"/students/"</span>)
+<span class="keyword">async def</span> <span class="function">create_student</span>(student: StudentCreate):
+    conn = sqlite3.<span class="function">connect</span>(<span class="string">'students.db'</span>)
+    cursor = conn.<span class="function">cursor</span>()
+    cursor.<span class="function">execute</span>(<span class="string">"INSERT INTO students (name, grade) VALUES (?, ?)"</span>,
+                   (student.name, student.grade))
+    conn.<span class="function">commit</span>()
+    <span class="keyword">return</span> {<span class="string">"message"</span>: <span class="string">"Student added successfully"</span>}
+                </div>
+            </div>
+            <div class="slide-number">7 / 10</div>
+            <div class="controls">
+                <button onclick="prevSlide()">← Previous</button>
+                <button onclick="nextSlide()">Next →</button>
+            </div>
+        </div>
+        
+        <!-- Slide 8: Frontend Structure -->
+        <div class="slide">
+            <h2>🎨 Frontend Structure</h2>
+            <div class="content">
+                <h3>Key Components:</h3>
+                <ul>
+                    <li><strong>Form Section:</strong> Input fields for name and grade</li>
+                    <li><strong>Table Section:</strong> Displays list of students</li>
+                    <li><strong>Action Buttons:</strong> Edit and Delete for each student</li>
+                    <li><strong>Notifications:</strong> Success/error messages</li>
+                </ul>
+                
+                <h3>JavaScript Functions:</h3>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li><code>fetchStudents()</code> - Load all students</li>
+                            <li><code>handleSubmit()</code> - Add/update student</li>
+                            <li><code>editStudent()</code> - Load data to form</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul>
+                            <li><code>deleteStudent()</code> - Remove student</li>
+                            <li><code>resetForm()</code> - Clear form</li>
+                            <li><code>showNotification()</code> - Display alerts</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">8 / 10</div>
+            <div class="controls">
+                <button onclick="prevSlide()">← Previous</button>
+                <button onclick="nextSlide()">Next →</button>
+            </div>
+        </div>
+        
+        <!-- Slide 9: Frontend-Backend Communication -->
+        <div class="slide">
+            <h2>🔄 Frontend-Backend Communication</h2>
+            <div class="content">
+                <h3>Fetch API Example (JavaScript):</h3>
+                <div class="code-block">
+<span class="comment">// POST request to add student</span>
+<span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'http://127.0.0.1:8000/students'</span>, {
+    method: <span class="string">'POST'</span>,
+    headers: {
+        <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>
+    },
+    body: JSON.<span class="function">stringify</span>({
+        name: <span class="string">'John Doe'</span>,
+        grade: <span class="string">85</span>
+    })
+});
+
+<span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="function">json</span>();
+                </div>
+                
+                <ul>
+                    <li>Uses <code>async/await</code> for asynchronous operations</li>
+                    <li>Sends JSON data in request body</li>
+                    <li>Receives JSON response from backend</li>
+                    <li>Updates UI dynamically without page reload</li>
+                </ul>
+            </div>
+            <div class="slide-number">9 / 10</div>
+            <div class="controls">
+                <button onclick="prevSlide()">← Previous</button>
+                <button onclick="nextSlide()">Next →</button>
+            </div>
+        </div>
+        
+        <!-- Slide 10: Summary -->
+        <div class="slide">
+            <h2>✅ Summary & Key Takeaways</h2>
+            <div class="content">
+                <h3>What We Built:</h3>
+                <ul>
+                    <li>Full-stack CRUD application with FastAPI and SQLite</li>
+                    <li>RESTful API with proper HTTP methods</li>
+                    <li>Responsive frontend with dynamic data updates</li>
+                    <li>Proper error handling and user feedback</li>
+                </ul>
+                
+                <h3>Technologies Used:</h3>
+                <div class="architecture">
+                    <div class="arch-box">
+                        <h4>Python</h4>
+                        <p>FastAPI</p>
+                        <p>Pydantic</p>
+                    </div>
+                    <div class="arch-box">
+                        <h4>Database</h4>
+                        <p>SQLite</p>
+                        <p>SQL</p>
+                    </div>
+                    <div class="arch-box">
+                        <h4>Frontend</h4>
+                        <p>HTML/CSS</p>
+                        <p>JavaScript</p>
+                    </div>
+                </div>
+                
+                <div class="highlight-box">
+                    <strong>🎯 Key Fix:</strong> Separated StudentCreate and Student models to prevent 422 Unprocessable Entity errors when creating new students.
+                </div>
+            </div>
+            <div class="slide-number">10 / 10</div>
+            <div class="controls">
+                <button onclick="prevSlide()">← Previous</button>
+                <button onclick="nextSlide()" disabled>Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+    </script>
+</body>
+</html>
